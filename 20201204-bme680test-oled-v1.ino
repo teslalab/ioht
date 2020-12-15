@@ -25,7 +25,6 @@
 #include <Adafruit_NeoPixel.h>
 #include "Adafruit_BME680.h"
 
-#include "bsec.h" // Libreria BSEC de Bosch para BME680
 
 #define BME_SCK 13
 #define BME_MISO 12
@@ -48,22 +47,28 @@ Adafruit_BME680 bme; // I2C
 #define PIXEL_COUNT 6  // Number of NeoPixels
 
 //values for alarms
-#define TEMP_MAX -999
-#define TEMP_MIN -999
+const int TEMP_MAX = -999;
+const int TEMP_MIN = -999;
 
-#define HUME_MAX -999
-#define HUME_MIN -999
+const int HUME_MAX = -999;
+const int HUME_MIN = -999;
 
-#define SAQI_MAX -999
-#define SAQI_MIN -999
+const int SAQI_MAX = -999;
+const int SAQI_MIN = -999;
 
-#define WIFI_WARNING -999
+const int WIFI_WARNING = -999;
 
 
-int temp = 0;
-int hume = 0;
-int pres = 0;
-int gas = 0;
+double temp, hume, pres, sAQI = 0;
+
+#include "bsec.h" // Libreria BSEC de Bosch para BME680
+
+//************** Funciones para el Sensor BME680 **************
+//Declaración de funciones de ayuda
+void checkIaqSensorStatus(void);
+// Creamos un objeto con clase BSEC Software
+Bsec iaqSensor;
+String output, output2;
 
 
 // Declare our NeoPixel strip object:
@@ -121,6 +126,24 @@ void setup() {
 
 void loop() {
 
+  output2 = "";
+  if (iaqSensor.run()) { // If new data is available
+    output2 += ", " + String(iaqSensor.rawTemperature);
+    output2 += ", " + String(iaqSensor.pressure);
+    output2 += ", " + String(iaqSensor.rawHumidity);
+    output2 += ", " + String(iaqSensor.gasResistance);
+    output2 += ", " + String(iaqSensor.iaq);
+    output2 += ", " + String(iaqSensor.iaqAccuracy);
+    output2 += ", " + String(iaqSensor.temperature);
+    output2 += ", " + String(iaqSensor.humidity);
+    output2 += ", " + String(iaqSensor.staticIaq);
+    output2 += ", " + String(iaqSensor.co2Equivalent);
+    output2 += ", " + String(iaqSensor.breathVocEquivalent);
+    Serial.println(output2);     
+  } else {
+      checkIaqSensorStatus();
+  }
+
   oled.clearDisplay();
   oled.setCursor(0, 0);
   oled.println("Tesla Lab Data");
@@ -136,15 +159,16 @@ void loop() {
     return;
   }
 
-  int temp = bme.temperature;
-  int hume = bme.humidity;
-  int pres = bme.pressure;
+  temp = bme.temperature;
+  hume = bme.humidity;
+  pres = bme.pressure;
+  sAQI = iaqSensor.staticIaq;
 
   Serial.print("Temperature = ");
-  Serial.print(bme.temperature);
+  Serial.print(temp);
   Serial.println(" *C");
   oled.print("T ");
-  oled.print(bme.temperature);
+  oled.print(temp);
   oled.println(" *C");
 
   Serial.print("Pressure = ");
@@ -152,12 +176,17 @@ void loop() {
   Serial.println(" hPa");
 
   Serial.print("Humidity = ");
-  Serial.print(bme.humidity);
+  Serial.print(hume);
   Serial.println(" %");
   oled.print("H ");
-  oled.print(bme.humidity);
+  oled.print(hume);
   oled.println(" %");
 
+  Serial.print("sAQI = ");
+  Serial.println(sAQI);
+  oled.print("sAQI ");
+  oled.println(sAQI);
+  /*
   Serial.print("Gas = ");
   Serial.print(bme.gas_resistance / 1000.0);
   Serial.println(" KOhms");
@@ -168,22 +197,19 @@ void loop() {
   Serial.print("Approx. Altitude = ");
   Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
   Serial.println(" m");
+  */
 
   // update the display with the new count
   oled.display();
 
   // checking values for alarms
-  temp = bme.temperature;
-  hume = bme.humidity;
-  pres = bme.pressure;
-  gas = bme.gas_resistance;
-
 
   int rojoRGB[3] = {255, 0, 0};
   int celesteRGB[3] = {0, 181, 255};
   
-  checkAlarm(temp, TEMP_MAX, TEMP_MIN, "Temperatura", rojoRGB, celesteRGB);
-  checkAlarm(hume, HUME_MAX, HUME_MIN, "Humedad", rojoRGB, celesteRGB);
+  checksAlarm(temp, TEMP_MAX, TEMP_MIN, "Temperatura", rojoRGB, celesteRGB);
+  checksAlarm(hume, HUME_MAX, HUME_MIN, "Humedad", rojoRGB, celesteRGB);
+  checksAQI(sAQI, SAQI_MAX, SAQI_MIN);
 
   if (bme.temperature > 35.0) {
     beepBuzzer();
@@ -307,10 +333,10 @@ void testTouchButton (int dataTouchButton, int LED) {
   }
 }
 
-void setLedsRGB(int R, int G, int B, int last_led, int delay1) {
+void setLedsRGB(int colors[3], int last_led, int delay1) {
 
   for (int i = 0; i < last_led; i++) {
-    neopixelLEDs.setPixelColor(i, neopixelLEDs.Color(255, 0, 0));
+    neopixelLEDs.setPixelColor(i, neopixelLEDs.Color(colors[0], colors[1], colors[2]));
   }
 
   neopixelLEDs.show();
@@ -345,7 +371,71 @@ void setLedsAndBuzzer(int colors[3], int last_led, int frequency, int count, int
   }
 }
 
-void checkAlarm(int value, int max, int min, char nombre[], int colorsHigh[3], int colorsLow[3]) {
+void checksAQI(int value, int max, int min) {
+  bool check = false;
+  
+  int rojoRGB[3] = {255, 0, 0};
+  int celesteRGB[3] = {0, 181, 255};
+  
+  if (max != -999) {
+    if (value > max) {
+
+      check = true;
+      oled.clearDisplay();
+      oled.setCursor(0, 0);
+      oled.println("Niveles de sAQI altos");
+      oled.print("Valor: ");
+      oled.println(value);
+
+      oled.display();
+
+      setLedsAndBuzzer(rojoRGB, PIXEL_COUNT, 1000, 6, 100);
+    }
+  }
+  if (min != -999) {
+
+      check = true;
+    if (value < min) {
+      oled.clearDisplay();
+      oled.setCursor(0, 0);
+      oled.println("Niveles de sAQI bajos");
+      oled.print("Valor: ");
+      oled.println(value);
+
+      oled.display();
+
+      setLedsAndBuzzer(celesteRGB, PIXEL_COUNT, 500, 3, 200);
+    }
+  }
+  if (!check){
+    oled.clearDisplay();
+    oled.setCursor(0, 0);
+    oled.println("Niveles de sAQI:");
+    oled.println(value);
+    if (value > 300){
+      int colors [3] = {126,0,35};
+      setLedsRGB(colors, PIXEL_COUNT, 1000);
+    }else if (value > 200){
+      int colors [3] = {143,63,151};
+      setLedsRGB(colors, PIXEL_COUNT, 1000);
+    }else if (value > 150){
+      int colors [3] = {255,0,0};
+      setLedsRGB(colors, PIXEL_COUNT, 1000);
+    }else if (value > 100){
+      int colors [3] = {255,126,0};
+      setLedsRGB(colors, PIXEL_COUNT, 1000);
+    }else if (value > 50){
+      int colors [3] = {255,255,0};
+      setLedsRGB(colors, PIXEL_COUNT, 1000);
+    }else if (value > 0){
+      int colors [3] = {0,228,0};
+      setLedsRGB(colors, PIXEL_COUNT, 1000);
+    }
+  }
+}
+
+void checksAlarm(int value, int max, int min, String nombre, int colorsHigh [3], int colorsLow [3]) {
+  bool check = false;
   if (max != -999) {
     if (value > max) {
 
@@ -354,7 +444,6 @@ void checkAlarm(int value, int max, int min, char nombre[], int colorsHigh[3], i
       oled.print("Niveles de ");
       oled.print(nombre);
       oled.println(" altos");
-
       oled.print("Valor: ");
       oled.println(value);
 
@@ -365,18 +454,43 @@ void checkAlarm(int value, int max, int min, char nombre[], int colorsHigh[3], i
   }
   if (min != -999) {
     if (value < min) {
+
       oled.clearDisplay();
       oled.setCursor(0, 0);
       oled.print("Niveles de ");
       oled.print(nombre);
       oled.println(" bajos");
-
       oled.print("Valor: ");
       oled.println(value);
+
 
       oled.display();
 
       setLedsAndBuzzer(colorsLow, PIXEL_COUNT, 500, 3, 200);
+    }
+  }
+}
+
+
+// Funciones de ayuda en el sensor BME680
+void checkIaqSensorStatus(void){
+  if (iaqSensor.status != BSEC_OK) {
+    if (iaqSensor.status < BSEC_OK) {
+      output = "BSEC error code : " + String(iaqSensor.status);
+      Serial.println(output);
+    } else {
+      output = "BSEC warning code : " + String(iaqSensor.status);
+      Serial.println(output);
+    }
+  }
+
+  if (iaqSensor.bme680Status != BME680_OK) {
+    if (iaqSensor.bme680Status < BME680_OK) {
+      output = "BME680 error code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
+    } else {
+      output = "BME680 warning code : " + String(iaqSensor.bme680Status);
+      Serial.println(output);
     }
   }
 }

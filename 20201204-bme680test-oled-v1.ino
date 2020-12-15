@@ -441,9 +441,9 @@ void checksAlarm(int value, int max, int min, String nombre, int colorsHigh [3],
 
       oled.clearDisplay();
       oled.setCursor(0, 0);
-      oled.print("Niveles de ");
-      oled.print(nombre);
-      oled.println(" altos");
+      oled.print("Nivel de ");
+      oled.println(nombre);
+      oled.println("ALTOS");
       oled.print("Valor: ");
       oled.println(value);
 
@@ -457,9 +457,9 @@ void checksAlarm(int value, int max, int min, String nombre, int colorsHigh [3],
 
       oled.clearDisplay();
       oled.setCursor(0, 0);
-      oled.print("Niveles de ");
+      oled.print("Nivel de ");
       oled.print(nombre);
-      oled.println(" bajos");
+      oled.println("BAJOS");
       oled.print("Valor: ");
       oled.println(value);
 

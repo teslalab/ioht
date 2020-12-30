@@ -61,6 +61,8 @@ const int WIFI_WARNING = -999;
 
 double temp, hume, pres, sAQI = 0;
 
+const int touch_treshold = 20;
+
 #include "bsec.h" // Libreria BSEC de Bosch para BME680
 
 //************** Funciones para el Sensor BME680 **************
@@ -186,18 +188,7 @@ void loop() {
   Serial.println(sAQI);
   oled.print("sAQI ");
   oled.println(sAQI);
-  /*
-  Serial.print("Gas = ");
-  Serial.print(bme.gas_resistance / 1000.0);
-  Serial.println(" KOhms");
-  oled.print("G ");
-  oled.print(bme.gas_resistance / 1000.0);
-  oled.println(" KOhms");
-
-  Serial.print("Approx. Altitude = ");
-  Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-  Serial.println(" m");
-  */
+  
 
   // update the display with the new count
   oled.display();
@@ -494,3 +485,83 @@ void checkIaqSensorStatus(void){
     }
   }
 }
+
+int menu_value = 0;
+
+void displayMenu(){
+
+  int boton_cancel = touchRead(12);
+  int boton_derecha = touchRead(15);
+  int boton_izquierda = touchRead(2);
+  int boton_enter = touchRead(13);
+  
+  while(boton_cancel > touch_treshold){
+    
+    oled.clearDisplay();
+    oled.setCursor(0, 0);
+    oled.setTextSize(2);
+    
+    String menu_string = "";
+
+    switch(menu_value){
+      case 0:
+        menu_string = "\n<-  Ver Datos  ->";
+        break;
+      case 1:
+        menu_string = "\n<- Configurar Alarmas ->";
+        break;
+      case 2:
+        menu_string = "\n<-  Tocar musica  ->";
+        break;
+      case 3:
+        menu_string = "\n<-  Jugar con Leds  ->";
+        break;
+    }
+
+    oled.print(menu_string);
+    oled.display();
+
+    boton_derecha = touchRead(15);
+    boton_izquierda = touchRead(2);
+    boton_enter = touchRead(13);
+    boton_cancel = touchRead(12);
+
+    if(boton_derecha < touch_treshold){
+      menu_value = (menu_value == 3) ? 0 : menu_value + 1;
+    }
+
+    if(boton_izquierda < touch_treshold){
+      menu_value = (menu_value == 0) ? 4 : menu_value - 1;
+    }
+
+    delay(100);
+
+    if (boton_enter < touch_treshold)
+    {
+      switch (menu_value)
+      {
+      case 0:
+        menuVerDatos();
+        break;
+      case 1:
+        menuConfigurarAlarmas();
+        break;
+      case 2:
+        tocarMusica();
+        break;
+      case 3:
+        jugarConLeds();
+        break;
+      
+      }
+    }
+    
+
+  }
+
+}
+
+void menuVerDatos(){}
+void menuConfigurarAlarmas(){}
+void tocarMusica(){}
+void jugarConLeds(){}

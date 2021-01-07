@@ -47,16 +47,16 @@ Adafruit_BME680 bme; // I2C
 #define PIXEL_COUNT 6  // Number of NeoPixels
 
 //values for alarms
-const int TEMP_MAX = -999;
-const int TEMP_MIN = -999;
+int TEMP_MAX = -999;
+int TEMP_MIN = -999;
 
-const int HUME_MAX = -999;
-const int HUME_MIN = -999;
+int HUME_MAX = -999;
+int HUME_MIN = -999;
 
-const int SAQI_MAX = -999;
-const int SAQI_MIN = -999;
+int SAQI_MAX = -999;
+int SAQI_MIN = -999;
 
-const int WIFI_WARNING = -999;
+int WIFI_WARNING = -999;
 
 
 double temp, hume, pres, sAQI = 0;
@@ -126,6 +126,8 @@ void setup() {
 
 }
 
+int data_index = 0;
+
 void loop() {
 
   output2 = "";
@@ -146,11 +148,6 @@ void loop() {
       checkIaqSensorStatus();
   }
 
-  oled.clearDisplay();
-  oled.setCursor(0, 0);
-  oled.println("Tesla Lab Data");
-  oled.display();
-
   // update the battery icon
   //oled.setBattery(battery);
   //oled.renderBattery();
@@ -165,6 +162,11 @@ void loop() {
   hume = bme.humidity;
   pres = bme.pressure;
   sAQI = iaqSensor.staticIaq;
+
+  oled.clearDisplay();
+  oled.setCursor(0, 0);
+  oled.println("Tesla Lab Data");
+  oled.display();
 
   Serial.print("Temperature = ");
   Serial.print(temp);
@@ -202,56 +204,22 @@ void loop() {
   checksAlarm(hume, HUME_MAX, HUME_MIN, "Humedad", rojoRGB, celesteRGB);
   checksAQI(sAQI, SAQI_MAX, SAQI_MIN);
 
-  if (bme.temperature > 35.0) {
-    beepBuzzer();
-    flashLED(0);
+
+  int boton_arriba = touchRead(4);
+  int boton_derecha = touchRead(15);  
+  int boton_abajo = touchRead(32);
+  int boton_izquierda = touchRead(2);
+  int boton_cancel = touchRead(12);
+  int boton_enter = touchRead(13);
+
+  if (boton_cancel < touch_treshold || boton_enter < touch_treshold)
+  {
+    displayMenu();
   }
+  
 
-  //Probando Touch Button ARRIBA
-  int lecturaBotonArriba = touchRead(4);
-  Serial.print("Arriba? ");
-  Serial.println(lecturaBotonArriba);
-  testTouchButton(lecturaBotonArriba, 0);
-  delay(50);
 
-  //Probando Touch Button DERECHA
-  int lecturaBotonDerecha = touchRead(15);
-  Serial.print("Derecha? ");
-  Serial.println(lecturaBotonDerecha);
-  testTouchButton(lecturaBotonDerecha, 1);
-  delay(50);
-
-  //Probando Touch Button ABAJO
-  int lecturaBotonAbajo = touchRead(32);
-  Serial.print("Abajo? ");
-  Serial.println(lecturaBotonAbajo);
-  testTouchButton(lecturaBotonAbajo, 2);
-  delay(50);
-
-  //Probando Touch Button IZQUIERDA
-  int lecturaBotonIzquierda = touchRead(2);
-  Serial.print("Izquierda? ");
-  Serial.println(lecturaBotonIzquierda);
-  testTouchButton(lecturaBotonIzquierda, 3);
-  delay(50);
-
-  //Probando Touch Button CANCEL
-  int lecturaBotonCancel = touchRead(12);
-  Serial.print("Cancel? ");
-  Serial.println(lecturaBotonCancel);
-  testTouchButton(lecturaBotonCancel, 4);
-  delay(50);
-
-  //Probando Touch Button ENTER
-  int lecturaBotonEnter = touchRead(13);
-  Serial.print("Enter? ");
-  Serial.println(lecturaBotonEnter);
-  testTouchButton(lecturaBotonEnter, 5);
-  delay(50);
-
-  Serial.println();
-
-  delay(10000);
+  delay(100);
 }
 
 void testingBuzzer() {

@@ -467,7 +467,7 @@ void displayMenu(){
     
     oled.clearDisplay();
     oled.setCursor(0, 0);
-    oled.setTextSize(0.5);
+    oled.setTextSize(1);
     
     String menu_string = "";
 

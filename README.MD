@@ -58,7 +58,7 @@ DOWN | GPIO32 | | CANCEL | GPIO12
 LEFT | GPIO2 | | ENTER | GPIO13
 
 ### IoHT - Dispositivos
-Dispositivo | GPIO | GPIO | Cantidad | 
+Dispositivo | GPIO | GPIO | Cantidad | GPIO
 --- | --- | --- | --- | ---
 NeoPixel | GPIO14 | | RIGHT | GPIO15 
 Sensor de Luz | GPIO34 | | CANCEL | GPIO12

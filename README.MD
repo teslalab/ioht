@@ -47,3 +47,20 @@ En algunos casos nuestra PC no es capaz de reconocer el dispositivo USB que noso
 5. Click en la opción ***Finalizar***
 
 Con esto estaría lista la instalación del Driver USB para nuestra tarjeta en el Sistema Operativo Windows.
+
+# Mapeo de Pines
+
+### ESP32 - Touch Sensor
+Touch | GPIO | *** | Touch | GPIO
+--- | --- | --- | --- | ---
+UP | GPIO4 | | RIGHT | GPIO15 
+DOWN | GPIO32 | | CANCEL | GPIO12
+LEFT | GPIO2 | | ENTER | GPIO13
+
+# Protocolos de comunicación
+## Protocolo I2C
+Nombre | GPIO
+--- | ---
+SDA | GPIO21
+SCL | GPIO22
+

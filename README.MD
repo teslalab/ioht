@@ -58,14 +58,14 @@ DOWN | GPIO32 | | CANCEL | GPIO12
 LEFT | GPIO2 | | ENTER | GPIO13
 
 ### IoHT - Dispositivos
-Dispositivo | GPIO | GPIO | Cantidad | GPIO
---- | --- | --- | --- | ---
-NeoPixel | GPIO14 | | RIGHT | GPIO15 
-Sensor de Luz | GPIO34 | | CANCEL | GPIO12
-Buzzer | GPIO27 | | ENTER | GPIO13
-BME680 | SDA | | SCL | GPIO13
-Relay | GPIO35 | | ENTER | GPIO13
-OLED | SDA | | SCL | 
+Dispositivo | GPIO | GPIO | Cantidad 
+--- | --- | --- | --- 
+NeoPixel | GPIO14 | | 6 
+Sensor de Luz | GPIO34 | | 1 
+Buzzer | GPIO27 | | 1 
+BME680 | SDA | SCL | 1 
+Relay | GPIO35 | | 1 
+OLED | SDA | SCL | 1 
 
 ## Protocolo de comunicación I2C
 Nombre | GPIO

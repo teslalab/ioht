@@ -24,6 +24,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_NeoPixel.h>
 #include "Adafruit_BME680.h"
+#include "bsec.h"
 
 
 #define BME_SCK 13
@@ -167,23 +168,31 @@ void setup() {
   testingRelay();
 
   while (!Serial);
-  Serial.println(F("BME680 test"));
+  
+  //Setup para el BME680
+    Wire.begin(21,22);
+    iaqSensor.begin(0x77, Wire);
+    output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
+    Serial.println(output);
+    checkIaqSensorStatus();
+  bsec_virtual_sensor_t sensorList[10] = {
+    BSEC_OUTPUT_RAW_TEMPERATURE,
+    BSEC_OUTPUT_RAW_PRESSURE,
+    BSEC_OUTPUT_RAW_HUMIDITY,
+    BSEC_OUTPUT_RAW_GAS,
+    BSEC_OUTPUT_IAQ,
+    BSEC_OUTPUT_STATIC_IAQ,
+    BSEC_OUTPUT_CO2_EQUIVALENT,
+    BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
+    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
+    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
+  };
+  iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_LP);
+  checkIaqSensorStatus();
 
-  if (!bme.begin()) {
-    Serial.println("Could not find a valid BME680 sensor, check wiring!");
-    oled.println("No BME680");
-    oled.display();
-    while (1);
-  }
-
-  // Set up oversampling and filter initialization
-  bme.setTemperatureOversampling(BME680_OS_8X);
-  bme.setHumidityOversampling(BME680_OS_2X);
-  bme.setPressureOversampling(BME680_OS_4X);
-  bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  bme.setGasHeater(320, 150); // 320*C for 150 ms
-
-
+  output = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent";
+  Serial.println(output);
+  
   // Testing buzzer
   pinMode(buzzer, OUTPUT);
 
@@ -232,15 +241,9 @@ void loop() {
   //oled.setBattery(battery);
   //oled.renderBattery();
 
-  if (! bme.performReading()) {
-    Serial.println("Failed to perform reading :(");
-    oled.println("Problemas con lecturas de : (");
-    return;
-  }
-
-  temp = bme.temperature;
-  hume = bme.humidity;
-  pres = bme.pressure;
+  temp = iaqSensor.temperature;
+  hume = iaqSensor.humidity;
+  pres = iaqSensor.pressure;
   sAQI = iaqSensor.staticIaq;
 
   oled.clearDisplay();
@@ -256,7 +259,7 @@ void loop() {
   oled.println(" *C");
 
   Serial.print("Pressure = ");
-  Serial.print(bme.pressure / 100.0);
+  Serial.print(iaqSensor.pressure / 100.0);
   Serial.println(" hPa");
 
   Serial.print("Humidity = ");

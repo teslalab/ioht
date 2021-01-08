@@ -47,11 +47,11 @@ Adafruit_BME680 bme; // I2C
 #define PIXEL_COUNT 6  // Number of NeoPixels
 
 //values for alarms
-int TEMP_MAX = -999;
-int TEMP_MIN = -999;
+int TEMP_MAX = 32;
+int TEMP_MIN = 30;
 
-int HUME_MAX = -999;
-int HUME_MIN = -999;
+int HUME_MAX = 48;
+int HUME_MIN = 46;
 
 int SAQI_MAX = -999;
 int SAQI_MIN = -999;

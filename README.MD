@@ -57,8 +57,7 @@ UP | GPIO4 | | RIGHT | GPIO15
 DOWN | GPIO32 | | CANCEL | GPIO12
 LEFT | GPIO2 | | ENTER | GPIO13
 
-# Protocolos de comunicación
-## Protocolo I2C
+## Protocolo de comunicación I2C
 Nombre | GPIO
 --- | ---
 SDA | GPIO21

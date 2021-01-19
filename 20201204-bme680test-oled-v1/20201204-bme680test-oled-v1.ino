@@ -507,8 +507,7 @@ void checkIaqSensorStatus(void){
 
 bool getTouch(int pin){
   int valor = touchRead(pin);
-  delay(50);
-  if (valor > 3 && valor < touch_treshold)
+  if (valor > 1 && valor < touch_treshold)
   {
     return true;
   }
@@ -550,7 +549,7 @@ void displayMenu(){
     }
 
     if(getTouch(pin_boton_izquierda)){
-      menu_value = (menu_value == 0) ? 4 : menu_value - 1;
+      menu_value = (menu_value == 0) ? 3 : menu_value - 1;
     }
 
     if (getTouch(pin_boton_enter))
@@ -573,6 +572,7 @@ void displayMenu(){
       }
     }
     
+    delay(200);
 
   }
 

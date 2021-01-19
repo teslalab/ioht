@@ -71,6 +71,12 @@ void checkIaqSensorStatus(void);
 Bsec iaqSensor;
 String output, output2;
 
+int pin_boton_arriba = 4;
+int pin_boton_derecha = 15;  
+int pin_boton_abajo = 32;
+int pin_boton_izquierda = 2;
+int pin_boton_cancel = 12;
+int pin_boton_enter = 13;
 
 // Declare our NeoPixel strip object:
 Adafruit_NeoPixel neopixelLEDs(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -201,7 +207,7 @@ void setup() {
 
   //Testing LEDs
   //testLEDs();
-  
+
   oled.clearDisplay();
   //oled.drawBitmap(0 , -21 , TL , 128 , 64 , WHITE );
   oled.setCursor(0,0);
@@ -210,7 +216,7 @@ void setup() {
   oled.setTextSize(1);
   oled.drawBitmap(0 , 0 , TL , 128 , 64 , WHITE );
   oled.display();
-  delay(8000);
+  delay(80);
 
 }
 
@@ -235,18 +241,18 @@ void loop() {
   oled.println("Tesla Lab Data");
   oled.display();
 
-  // oled.print("T ");
-  // oled.print(temp);
-  // oled.println(" *C");
+  oled.print("T ");
+  oled.print(temp);
+  oled.println(" *C");
 
-  // oled.print("H ");
-  // oled.print(hume);
-  // oled.println(" %");
+  oled.print("H ");
+  oled.print(hume);
+  oled.println(" %");
 
-  // oled.print("sAQI ");
-  // oled.println(sAQI);
-  
+  oled.print("sAQI ");
+  oled.println(sAQI);
 
+  oled.display();
 
   // checking values for alarms
 
@@ -258,34 +264,13 @@ void loop() {
   //checksAQI(sAQI, SAQI_MAX, SAQI_MIN);
 
 
-  int boton_arriba = touchRead(4);
-  int boton_derecha = touchRead(15);  
-  int boton_abajo = touchRead(32);
-  int boton_izquierda = touchRead(2);
-  int boton_cancel = touchRead(12);
-  int boton_enter = touchRead(13);
-
-  if (boton_cancel < touch_treshold || boton_enter < touch_treshold)
+  if (getTouch(pin_boton_cancel) || getTouch(pin_boton_enter))
   {
-    //displayMenu();
+    displayMenu();
   }
-  
-  oled.print("ar:");
-  oled.print(boton_arriba);
-  oled.print(" abaj:");
-  oled.println(boton_abajo);
-  oled.print("der:");
-  oled.print(boton_derecha);
-  oled.print(" izq:");
-  oled.println(boton_izquierda);
-  oled.print("can:");
-  oled.print(boton_cancel);
-  oled.print(" en:");
-  oled.println(boton_enter);
 
-  oled.display();
 
-  delay(200);
+  delay(10);
 }
 
 void testingBuzzer() {
@@ -520,16 +505,21 @@ void checkIaqSensorStatus(void){
   }
 }
 
+bool getTouch(int pin){
+  int valor = touchRead(pin);
+  delay(50);
+  if (valor > 3 && valor < touch_treshold)
+  {
+    return true;
+  }
+  return false;
+}
+
 int menu_value = 0;
 
 void displayMenu(){
-
-  int boton_cancel = touchRead(12);
-  int boton_derecha = touchRead(15);
-  int boton_izquierda = touchRead(2);
-  int boton_enter = touchRead(13);
   
-  while(boton_cancel > touch_treshold){
+  while(!getTouch(pin_boton_cancel)){
     
     oled.clearDisplay();
     oled.setCursor(0, 0);
@@ -539,38 +529,31 @@ void displayMenu(){
 
     switch(menu_value){
       case 0:
-        menu_string = "\n <-  Ver Datos  ->";
+        menu_string = "\n <  Ver Datos  >";
         break;
       case 1:
-        menu_string = "\n<-Configurar Alarmas->";
+        menu_string = "\n<Configurar Alarmas>";
         break;
       case 2:
-        menu_string = "\n<-  Tocar musica  ->";
+        menu_string = "\n<  Tocar musica  >";
         break;
       case 3:
-        menu_string = "\n<- Jugar con Leds ->";
+        menu_string = "\n< Jugar con Leds >";
         break;
     }
 
     oled.print(menu_string);
     oled.display();
 
-    boton_derecha = touchRead(15);
-    boton_izquierda = touchRead(2);
-    boton_enter = touchRead(13);
-    boton_cancel = touchRead(12);
-
-    if(boton_derecha < touch_treshold){
+    if(getTouch(pin_boton_derecha)){
       menu_value = (menu_value == 3) ? 0 : menu_value + 1;
     }
 
-    if(boton_izquierda < touch_treshold){
+    if(getTouch(pin_boton_izquierda)){
       menu_value = (menu_value == 0) ? 4 : menu_value - 1;
     }
 
-    delay(100);
-
-    if (boton_enter < touch_treshold)
+    if (getTouch(pin_boton_enter))
     {
       switch (menu_value)
       {

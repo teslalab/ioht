@@ -239,7 +239,6 @@ void loop() {
   oled.clearDisplay();
   oled.setCursor(0, 0);
   oled.println("Tesla Lab Data");
-  oled.display();
 
   oled.print("T ");
   oled.print(temp);
@@ -264,7 +263,7 @@ void loop() {
   //checksAQI(sAQI, SAQI_MAX, SAQI_MIN);
 
 
-  if (getTouch(pin_boton_cancel) || getTouch(pin_boton_enter))
+  if (getTouch(pin_boton_enter))
   {
     displayMenu();
   }
@@ -506,10 +505,20 @@ void checkIaqSensorStatus(void){
 }
 
 bool getTouch(int pin){
-  int valor = touchRead(pin);
-  if (valor > 1 && valor < touch_treshold)
+
+  if (pin != pin_boton_abajo)
   {
-    return true;
+    int valor = touchRead(pin);
+    if (valor < touch_treshold)
+    {
+      delay(50);
+      valor = touchRead(pin);
+      if (valor < touch_treshold)
+      {
+        return true;
+      }
+    }
+    return false;
   }
   return false;
 }
@@ -522,7 +531,6 @@ void displayMenu(){
     
     oled.clearDisplay();
     oled.setCursor(0, 0);
-    oled.setTextSize(1);
     
     String menu_string = "";
 
@@ -539,23 +547,24 @@ void displayMenu(){
       case 3:
         menu_string = "\n< Jugar con Leds >";
         break;
+      case 4:
+        menu_string = "\n< Luz con Timer >";
+        break;
     }
 
     oled.print(menu_string);
     oled.display();
 
     if(getTouch(pin_boton_derecha)){
-      menu_value = (menu_value == 3) ? 0 : menu_value + 1;
+      menu_value = (menu_value == 4) ? 0 : menu_value + 1;
     }
 
     if(getTouch(pin_boton_izquierda)){
-      menu_value = (menu_value == 0) ? 3 : menu_value - 1;
+      menu_value = (menu_value == 0) ? 4 : menu_value - 1;
     }
 
-    if (getTouch(pin_boton_enter))
-    {
-      switch (menu_value)
-      {
+    if (getTouch(pin_boton_enter)){
+      switch (menu_value){
       case 0:
         menuVerDatos();
         break;
@@ -567,6 +576,9 @@ void displayMenu(){
         break;
       case 3:
         jugarConLeds();
+        break;
+      case 4:
+        luzConTimer();
         break;
       
       }
@@ -582,3 +594,152 @@ void menuVerDatos(){}
 void menuConfigurarAlarmas(){}
 void tocarMusica(){}
 void jugarConLeds(){}
+
+void luzConTimer(){
+  int r = 100;
+  int g = 100;
+  int b = 100;
+  int index = 0;
+  
+  oled.clearDisplay();
+  oled.setCursor(0, 0);
+  oled.println("Elija Color (RGB)");
+
+  while(!getTouch(pin_boton_cancel)){
+    oled.clearDisplay();
+    oled.setCursor(0, 0);
+    oled.println("Elija Color (RGB)");
+    oled.print("R:  ");
+    oled.println(r);
+    oled.print("G:  ");
+    oled.println(g);
+    oled.print("B:  ");
+    oled.println(b);
+    oled.display();
+    delay(100);
+
+    switch (index){
+      case 0:
+      oled.clearDisplay();
+      oled.setCursor(0, 0);
+      oled.println("Elija Color (RGB)");
+      oled.println();
+      oled.print("G:  ");
+      oled.println(g);
+      oled.print("B:  ");
+      oled.println(b);
+      oled.display();
+      delay(50);
+      break;
+
+      case 1:
+      oled.clearDisplay();
+      oled.setCursor(0, 0);
+      oled.println("Elija Color (RGB)");
+      oled.print("R:  ");
+      oled.println(r);
+      oled.println();
+      oled.print("B:  ");
+      oled.println(b);
+      oled.display();
+      delay(50);
+      break;
+
+      case 2:
+      oled.clearDisplay();
+      oled.setCursor(0, 0);
+      oled.println("Elija Color (RGB)");
+      oled.print("R:  ");
+      oled.println(r);
+      oled.print("G:  ");
+      oled.println(g);
+      oled.println();
+      oled.display();
+      delay(50);
+      break;
+    
+    }
+    
+
+    if(getTouch(pin_boton_derecha)){
+      index = (index == 2) ? 0 : index + 1;
+    }
+    if(getTouch(pin_boton_izquierda)){
+      index = (index == 0) ? 2 : index - 1;
+    }
+    if(getTouch(pin_boton_arriba)){
+      switch (index){
+      case 0:
+        r = (r >= 255) ? 255 : r + 5;
+      break;
+      case 1:
+        g = (g >= 255) ? 255 : g + 5;
+      break;
+      case 2:
+        b = (b >= 255) ? 255 : b + 5;
+      break;
+      }
+    }
+    if(getTouch(pin_boton_abajo)){
+      switch (index){
+      case 0:
+        r = (r <= 0) ? 0 : r - 5;
+      break;
+      case 1:
+        g = (g <= 0) ? 0 : g - 5;
+      break;
+      case 2:
+        b = (b <= 0) ? 0 : b - 5;
+      break;
+      }
+    }
+
+    int tiempo = 0;
+    if(getTouch(pin_boton_enter)){
+      while (!getTouch(pin_boton_cancel)){
+        oled.clearDisplay();
+        oled.setCursor(0, 0);
+        oled.println("Timer en Segundos: ");
+        oled.println();
+        oled.print("      ");
+        oled.println(tiempo);
+        oled.display();
+        delay(50);
+
+        if(getTouch(pin_boton_arriba)){
+          tiempo = tiempo + 10;
+        }
+        if(getTouch(pin_boton_abajo)){
+          tiempo = tiempo - 10;
+        }
+
+        if(getTouch(pin_boton_enter)){
+          oled.clearDisplay();
+          oled.setCursor(0, 0);
+          int tiempo_actual = millis() / 1000;
+          oled.println("Luz con timer");
+          oled.display();
+          delay(50);
+          for (int i = 0; i < PIXEL_COUNT; i++) {
+            neopixelLEDs.setPixelColor(i, neopixelLEDs.Color(r, g, b));
+          }
+          neopixelLEDs.show();
+          while (!getTouch(pin_boton_cancel) && (tiempo_actual + tiempo > millis()/1000)) {
+            oled.clearDisplay();
+            oled.setCursor(0, 0);
+            oled.println("Luz con timer");
+            oled.println(tiempo_actual + tiempo - millis()/1000);
+            oled.display();
+          }
+          neopixelLEDs.clear();
+          neopixelLEDs.show();
+          
+        }
+      }
+      delay(100);
+    }
+
+  }
+
+
+}

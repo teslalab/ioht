@@ -168,8 +168,8 @@ void setup() {
 
   EasyBuzzer.setPin(buzzer);  //Initialize buzzer
   
-  //testingBuzzer();
-  //testingRelay();
+  testingBuzzer();
+  testingRelay();
 
   while (!Serial);
   
@@ -206,7 +206,7 @@ void setup() {
   neopixelLEDs.show();  // Initialize all pixels to 'off'
 
   //Testing LEDs
-  //testLEDs();
+  testLEDs();
 
   oled.clearDisplay();
   //oled.drawBitmap(0 , -21 , TL , 128 , 64 , WHITE );
@@ -216,7 +216,7 @@ void setup() {
   oled.setTextSize(1);
   oled.drawBitmap(0 , 0 , TL , 128 , 64 , WHITE );
   oled.display();
-  delay(80);
+  delay(8000);
 
 }
 

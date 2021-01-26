@@ -11,11 +11,11 @@
 
 // Libreria para usar las propiedades de la pantalla OLED
   #include <Adafruit_FeatherOLED.h> 
-
+  Adafruit_FeatherOLED oled = Adafruit_FeatherOLED();
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
   const char* ssid = "NOMBRE_DEL_WiFi"; // 
   const char* password = "CONTRASEÑA";
-  Adafruit_FeatherOLED oled = Adafruit_FeatherOLED();
+  
 
 /*
   Los códigos que se encuentran representan el código necesario para representar una imagen BMP

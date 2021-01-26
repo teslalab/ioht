@@ -73,7 +73,7 @@ String output, output2;
 
 int pin_boton_arriba = 4;
 int pin_boton_derecha = 15;  
-int pin_boton_abajo = 32;
+int pin_boton_abajo = 33;
 int pin_boton_izquierda = 2;
 int pin_boton_cancel = 12;
 int pin_boton_enter = 13;
@@ -506,19 +506,15 @@ void checkIaqSensorStatus(void){
 
 bool getTouch(int pin){
 
-  if (pin != pin_boton_abajo)
+  int valor = touchRead(pin);
+  if (valor < touch_treshold)
   {
-    int valor = touchRead(pin);
+    delay(50);
+    valor = touchRead(pin);
     if (valor < touch_treshold)
     {
-      delay(50);
-      valor = touchRead(pin);
-      if (valor < touch_treshold)
-      {
-        return true;
-      }
+      return true;
     }
-    return false;
   }
   return false;
 }

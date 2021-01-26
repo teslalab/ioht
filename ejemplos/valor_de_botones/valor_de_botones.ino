@@ -207,7 +207,7 @@ void setup() {
   oled.setTextSize(1);
   oled.drawBitmap(0 , 0 , TL , 128 , 64 , WHITE );
   oled.display();
-  delay(8000);
+  delay(800);
 
 }
 
@@ -257,7 +257,7 @@ void loop() {
 
   int boton_arriba = touchRead(4);
   int boton_derecha = touchRead(15);  
-  int boton_abajo = touchRead(32);
+  int boton_abajo = touchRead(33);
   int boton_izquierda = touchRead(2);
   int boton_cancel = touchRead(12);
   int boton_enter = touchRead(13);

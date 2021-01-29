@@ -1,0 +1,6 @@
+{
+    "board": "esp32:esp32:esp32wrover",
+    "configuration": "PartitionScheme=default,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none",
+    "sketch": "20201204-bme680test-oled-v1/20201204-bme680test-oled-v1.ino",
+    "port": "/dev/ttyUSB0"
+}

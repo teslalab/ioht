@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/gabriel/.arduino15/packages/esp32/tools/**",
+                "/home/gabriel/Arduino/libraries/**",
+                "/usr/bin/libraries/**",
+                "/home/gabriel/.arduino15/packages/esp32/hardware/esp32/1.0.4/**"
+            ],
+            "forcedInclude": [],
+            "defines": [
+                "USBCON"
+            ],
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14"
+        }
+    ],
+    "version": 4
+}

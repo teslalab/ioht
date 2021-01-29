@@ -24,6 +24,8 @@
 #include "Adafruit_BME680.h"
 #include "bsec.h"
 
+#define NOMBRE gabriel
+#define NUMERO 002
 
 #define BME_SCK 13
 #define BME_MISO 12

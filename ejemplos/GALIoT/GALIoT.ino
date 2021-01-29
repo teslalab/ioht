@@ -17,7 +17,10 @@
   Adafruit_FeatherOLED oled = Adafruit_FeatherOLED();  
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
-  const char* ssid = "Cuarto_De_Juego"; // 
+  /*const char* ssid = "TIGO-9635"; // 
+  const char* password = "2NJ555301438";*/
+
+  const char* ssid = "Cuarto_De_Juego"; 
   const char* password = "A15004127";
   
 // Credenciales para GALioT
@@ -27,10 +30,11 @@
 //Nombre del Servidor MQTT
   const char* mqtt_server = "galiot.galileo.edu";
 //Modificar al nombre que se asigne en el dashboard.
-  #define TEAM_NAME "ioht/isidro/001"
+  #define TEAM_NAME "ioht/isidro/003"
 
 /*Tiempo para publicar datos*/
-#define PUBLISH_PERIOD (60000 * 30 ) // 60000 = 1 minuto, se multiplica por los minutos en que queremos postear
+//#define PUBLISH_PERIOD (60000 * 30 ) // 60000 = 1 minuto, se multiplica por los minutos en que queremos postear
+#define PUBLISH_PERIOD (15000)
 #define PreHeat (60000 * 4)
 
 //Declaración de funciones de ayuda
@@ -111,6 +115,7 @@ void loop() {
   
   int actualTime = millis();
   int actualTime2 = millis();
+  
     if (actualTime - lastReadingTime > PUBLISH_PERIOD) {
     lastReadingTime = actualTime;
     Serial.println("Dato enviado");
@@ -184,16 +189,41 @@ void loop() {
     mqtt_client.publish(getTopic("VOCe"), msg);  
     
     //************ Posteamos la intensidad de señal ************
-  rssi = WiFi.RSSI();
+    rssi = WiFi.RSSI();
     Serial.println("Intensidad de Señal : " + String(rssi));
     String str10(rssi);
     str10.toCharArray(msg, 50);
     mqtt_client.publish(getTopic("rssi"), msg); 
 
-
+  
   
   }  //Fin de la funcion para publicar datos
 
+    // Serial.println();
+    delay(50);
+  
+    unsigned long time_trigger = millis();
+  if (iaqSensor.run()) { // If new data is available
+    output2 = String(time_trigger);
+    
+    output2 = String(time_trigger);
+    output2 += ", " + String(iaqSensor.rawTemperature);
+    output2 += ", " + String(iaqSensor.pressure);
+    output2 += ", " + String(iaqSensor.rawHumidity);
+    output2 += ", " + String(iaqSensor.gasResistance);
+    output2 += ", " + String(iaqSensor.iaq);
+    output2 += ", " + String(iaqSensor.iaqAccuracy);
+    output2 += ", " + String(iaqSensor.temperature);
+    output2 += ", " + String(iaqSensor.humidity);
+    output2 += ", " + String(iaqSensor.staticIaq);
+    output2 += ", " + String(iaqSensor.co2Equivalent);
+    output2 += ", " + String(iaqSensor.breathVocEquivalent);
+    Serial.println(output2);
+   
+    
+  } else {
+    checkIaqSensorStatus();
+  }
 }
 
 // Helper function definitions

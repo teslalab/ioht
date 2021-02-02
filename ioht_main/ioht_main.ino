@@ -487,10 +487,22 @@ void checksAlarm(int value, int max, int min, String nombre, int colorsHigh [3],
 void checkIaqSensorStatus(void){
   if (iaqSensor.status != BSEC_OK) {
     if (iaqSensor.status < BSEC_OK) {
+      oled.clearDisplay();
+      oled.setCursor(0,9);
+      oled.print("BSEC error code: " + String(iaqSensor.status));
+      oled.display();
+      delay(5000);
+      oled.clearDisplay();
       output = "BSEC error code : " + String(iaqSensor.status);
       Serial.println(output);
     } else {
       output = "BSEC warning code : " + String(iaqSensor.status);
+      oled.clearDisplay();
+      oled.setCursor(0,9);
+      oled.print("BSEC warning code: " + String(iaqSensor.status));
+      oled.display();
+      delay(5000);
+      oled.clearDisplay();
       Serial.println(output);
     }
   }
@@ -498,9 +510,21 @@ void checkIaqSensorStatus(void){
   if (iaqSensor.bme680Status != BME680_OK) {
     if (iaqSensor.bme680Status < BME680_OK) {
       output = "BME680 error code : " + String(iaqSensor.bme680Status);
+      oled.clearDisplay();
+      oled.setCursor(0,9);
+      oled.print("BME680 error code: " + String(iaqSensor.bme680Status));
+      oled.display();
+      delay(5000);
+      oled.clearDisplay();
       Serial.println(output);
     } else {
       output = "BME680 warning code : " + String(iaqSensor.bme680Status);
+      oled.clearDisplay();
+      oled.setCursor(0,9);
+      oled.print("BSEC warning code: " + String(iaqSensor.bme680Status));
+      oled.display();
+      delay(5000);
+      oled.clearDisplay();
       Serial.println(output);
     }
   }
@@ -739,5 +763,20 @@ void luzConTimer(){
 
   }
 
+
+}
+
+void errLeds(void){
+
+ for (int i = 0; i < neopixelLEDs.numPixels(); i++) { // For each pixel in strip...
+    neopixelLEDs.setPixelColor(i, neopixelLEDs.Color(255, 0, 0)); //  Set pixel's color (in RAM)
+    neopixelLEDs.show();                          //  Update strip to match
+    delay(250);
+   
+  }
+  //Turning LEDs off
+  neopixelLEDs.clear();
+  neopixelLEDs.show();
+  delay(250);
 
 }

@@ -20,16 +20,19 @@
 Importante configuarar las siguientes variables, para el correcto funcionamiento en el dashboar de GALIoT
 también para logra una conexión a Nuestra Red WiF
 */
-#define NOMBRE gabriel
-#define NUMERO 002
+//A continuación debe reemplazar el nombre y numero de estación que le fue asignado
+#define TEAM_NAME "ioht/isidro/003" //  proyecto/nombre/estacion 
 // Variables para la conexión a Red WiFi
-const char* ssid = "Nombre_De_La_Red"; // Debe reemplazar por el nombre de su RED WiFi
-const char* password = "Contraseña"; // Debe reemplazar por la contraseña de su RED WiFi
+const char* ssid = "Tigo-9635"; // Debe reemplazar por el nombre de su RED WiFi
+const char* password = "2NJ555301438"; // Debe reemplazar por la contraseña de su RED WiFi
 
-#define BME_SCK 13
-#define BME_MISO 12
-#define BME_MOSI 11
-#define BME_CS 10
+/*
+A Partir de aca no tocar nada en el código
+*/
+// Credenciales para GALioT
+#define USERNAME "aquality"
+#define PASSWORD "$Air333"
+const char* mqtt_server = "galiot.galileo.edu";
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
@@ -58,8 +61,22 @@ int SAQI_MIN = -999;
 
 int WIFI_WARNING = -999;
 
+// CONFIGURACION DE GALIOT Y MQTT 
+int lastReadingTime,lastReadingTime2 = 0;
+double temp,ds18, hume, pres = 0;
+double aqi , sAQI , AQIa = 0;
+double CO2e, VOCe, gas, rssi = 0; 
+char msg[50];
+char msg1[50];
+char cnt[50];
+char msg_r[50];
+char topic_name[250];
+// network variables
+WiFiClient espClient;
+PubSubClient mqtt_client(espClient);
+// FIN CONFIGURACION DE GALIOT Y MQTT
 
-double temp, hume, pres, sAQI = 0;
+//double temp, hume, pres, sAQI = 0;
 
 const int touch_treshold = 10;
 
@@ -231,28 +248,9 @@ void loop() {
   } else {
       checkIaqSensorStatus();
   }
-
-  temp = iaqSensor.temperature;
-  hume = iaqSensor.humidity;
-  pres = iaqSensor.pressure;
-  sAQI = iaqSensor.staticIaq;
-
   oled.clearDisplay();
-  oled.setCursor(0, 0);
-  oled.println("Tesla Lab Data");
+  preHeatSensor();
 
-  oled.print("T ");
-  oled.print(temp);
-  oled.println(" *C");
-
-  oled.print("H ");
-  oled.print(hume);
-  oled.println(" %");
-
-  oled.print("sAQI ");
-  oled.println(sAQI);
-
-  oled.display();
 
   // checking values for alarms
 
@@ -778,4 +776,186 @@ void errLeds(void){
   neopixelLEDs.show();
   delay(250);
 
+}
+
+void publish(char* topic, char* payload) {
+  Serial.println(topic_name);
+  mqtt_client.publish(topic_name, payload);
+}
+
+char* getTopic(char* topic) {
+  sprintf(topic_name, "/%s/%s", TEAM_NAME, topic);
+  return topic_name;
+}
+
+void reconnect() {
+  // Loop until we're reconnected
+  while (!mqtt_client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    Serial.println("connected");
+
+    if (mqtt_client.connect(TEAM_NAME)) {
+      
+      //mqtt_client.subscribe(getTopic("rgb"));
+    }else {
+      Serial.print("failed, rc=");
+      Serial.print(mqtt_client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    msg_r[i] = (char)payload[i];
+  }
+  msg_r[length] = 0;
+  Serial.print("'");
+  Serial.print(msg_r);
+  Serial.println("'");
+}
+
+void setupMQTT() {
+  delay(10);
+  // Inciamos la conexion WiFi con la Red que colocamos
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin( ssid , password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  mqtt_client.setServer(mqtt_server, 1883);
+  mqtt_client.setCallback(callback);
+}
+
+void publicarDatos(){
+
+    //output = String(time_trigger);
+    
+    //************ Posteamos la temperatura ************
+    temp = iaqSensor.temperature;
+    Serial.println("Temperatura : " + String(temp));
+    String str(temp);
+    str.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("temp"), msg);  
+    
+    //************ Posteamos la humedad ************
+    hume = iaqSensor.humidity;
+    Serial.println("Humedad : " + String(hume));
+    String str2(hume);
+    str2.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("hume"), msg);  
+    
+    //************ Posteamos la Presion Atmosferica ************
+    pres = iaqSensor.pressure;
+    Serial.println("Presion Atmosferica : " + String(pres));
+    String str3(pres);
+    str3.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("pres"), msg);  
+    
+    //************ Posteamos el Index Air Quality ************
+    aqi = iaqSensor.iaq;
+    Serial.println("Index Air Quality : " + String(aqi));
+    String str4(aqi);
+    str4.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("aqi"), msg);  
+    
+    //************ Posteamos el Static Index Air Quality ************
+    sAQI = iaqSensor.staticIaq;
+    Serial.println("Static Index Air Quality : " + String(sAQI));
+    String str5(sAQI);
+    str5.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("sAQI"), msg);  
+    
+    //************ Posteamos el Index Air Quality Accurary ************
+    AQIa = iaqSensor.iaqAccuracy;
+    Serial.println("Index Air Quality Accuracy : " + String(AQIa));
+    String str6(AQIa);
+    str6.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("AQIa"), msg);
+    
+    //************ Posteamos el Gas Resistence ************
+    gas = (iaqSensor.gasResistance)/1000;
+    Serial.println("Gas Resistance kOhms: " + String(gas));
+    String str7(gas);
+    str7.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("gas"), msg);  
+    
+    //************ Posteamos el CO2 Equivalente ************
+    CO2e = iaqSensor.co2Equivalent;
+    Serial.println("CO2 Equivalente : " + String(CO2e));
+    String str8(CO2e);
+    str8.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("CO2e"), msg); 
+    
+    //************ Posteamos el VOC Equivalente ************
+    VOCe = iaqSensor.breathVocEquivalent;
+     Serial.println("VOC Equivalente : " + String(VOCe));
+    String str9(VOCe);
+    str9.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("VOCe"), msg);  
+    
+    //************ Posteamos la intensidad de señal ************
+    rssi = WiFi.RSSI();
+    Serial.println("Intensidad de Señal : " + String(rssi));
+    String str10(rssi);
+    str10.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("rssi"), msg); 
+
+}
+
+void preHeatSensor(){
+  unsigned long time_trigger = millis();
+  //if (iaqSensor.run()) { // If new data is available
+    output2 = String(time_trigger);
+    
+    output2 = String(time_trigger);
+    output2 += ", " + String(iaqSensor.rawTemperature);
+    output2 += ", " + String(iaqSensor.pressure);
+    output2 += ", " + String(iaqSensor.rawHumidity);
+    output2 += ", " + String(iaqSensor.gasResistance);
+    output2 += ", " + String(iaqSensor.iaq);
+    output2 += ", " + String(iaqSensor.iaqAccuracy);
+    output2 += ", " + String(iaqSensor.temperature);
+    output2 += ", " + String(iaqSensor.humidity);
+    output2 += ", " + String(iaqSensor.staticIaq);
+    output2 += ", " + String(iaqSensor.co2Equivalent);
+    output2 += ", " + String(iaqSensor.breathVocEquivalent);
+    //Serial.println(output2);
+    oled.clearDisplay();
+    oled.setCursor(0, 0);
+    oled.println("Tesla Lab Data");
+  
+    oled.print("T ");
+    oled.print(iaqSensor.temperature);
+    oled.println(" *C");
+
+    oled.print("H ");
+    oled.print(iaqSensor.humidity);
+    oled.println(" %");
+
+    oled.print("sAQI ");
+    oled.println(iaqSensor.staticIaq);
+
+    oled.display();
+    
+ // } else {
+ //   checkIaqSensorStatus();
+  //}
 }

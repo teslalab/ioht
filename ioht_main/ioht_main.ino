@@ -1,19 +1,8 @@
-/***************************************************************************
-  This is a library for the BME680 gas, humidity, temperature & pressure sensor
-
-  Designed specifically to work with the Adafruit BME680 Breakout
-  ----> http://www.adafruit.com/products/3660
-
-  These sensors use I2C or SPI to communicate, 2 or 4 pins are required
-  to interface.
-
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing products
-  from Adafruit!
-
-  Written by Limor Fried & Kevin Townsend for Adafruit Industries.
-  BSD license, all text above must be included in any redistribution
- ***************************************************************************/
+/*
+ *Programa para el funcionamiento de la tarjeta de IoHT  
+ *visualización de datos, envío de datos a GALIoT y funcionamiento de pantalla OLEd y Botones touch 
+ *Programa realizado por Angel Isidro y Gabriel Monzón - 02 febrero 2021 - Versión 1 
+ */
 
 #include <EasyBuzzer.h>
 #include <Wire.h>
@@ -23,9 +12,19 @@
 #include <Adafruit_NeoPixel.h>
 #include "Adafruit_BME680.h"
 #include "bsec.h"
-
+#include <WiFi.h>
+#include <PubSubClient.h> //Libreria para publicación y recepción de datos.
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+/*
+Importante configuarar las siguientes variables, para el correcto funcionamiento en el dashboar de GALIoT
+también para logra una conexión a Nuestra Red WiF
+*/
 #define NOMBRE gabriel
 #define NUMERO 002
+// Variables para la conexión a Red WiFi
+const char* ssid = "Nombre_De_La_Red"; // Debe reemplazar por el nombre de su RED WiFi
+const char* password = "Contraseña"; // Debe reemplazar por la contraseña de su RED WiFi
 
 #define BME_SCK 13
 #define BME_MISO 12

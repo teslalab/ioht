@@ -2,8 +2,8 @@
  *Programa conexión WiFi y envio de datos a la plataforma GALIoT con la tarjeta de IoHT  
  *Conexión y envio de información 
  *Descripción: En este programa usaremos la tarjeta de IoHT, conectaremos a la plataforma GALIoT
- *con ello podremos visualizar información de nuestras variables ambientales en los dashboard de IoHT
- *
+ *con ello podremos visualizar información de nuestras variables ambientales en los dashboard de IoHT 
+ *cada 30 minutos se publicaran nuestro datos en el dashboard de GALIoT
  *Programa realizado por Angel Isidro - 26 enero 2021 - Versión 1 
  */
 // Libreria para usar las propiedades de conexión WiFi
@@ -11,13 +11,17 @@
   #include <PubSubClient.h> //Libreria para publicación y recepción de datos.
   #include <Wire.h> //Conexión de dispositivos I2C
   #include "bsec.h" 
-
+  #include <NTPClient.h>
+  #include <WiFiUdp.h>
+// Variables para conexion NTP
+  WiFiUDP ntpUDP;
+  NTPClient timeClient(ntpUDP);
 // Libreria para usar las propiedades de la pantalla OLED
   #include <Adafruit_FeatherOLED.h> 
   Adafruit_FeatherOLED oled = Adafruit_FeatherOLED();  
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
-  /*const char* ssid = "TIGO-9635"; // 
+ /* const char* ssid = "TIGO-9635"; // 
   const char* password = "2NJ555301438";*/
 
   const char* ssid = "Cuarto_De_Juego"; 
@@ -31,11 +35,6 @@
   const char* mqtt_server = "galiot.galileo.edu";
 //Modificar al nombre que se asigne en el dashboard.
   #define TEAM_NAME "ioht/isidro/003"
-
-/*Tiempo para publicar datos*/
-//#define PUBLISH_PERIOD (60000 * 30 ) // 60000 = 1 minuto, se multiplica por los minutos en que queremos postear
-#define PUBLISH_PERIOD (15000)
-#define PreHeat (60000 * 4)
 
 //Declaración de funciones de ayuda
   void checkIaqSensorStatus(void);
@@ -79,6 +78,7 @@ void setup() {
   //Fin de la inicialización WiFi
   //Setup para MQTT
   setupMQTT();
+  timeClient.begin();
 //Setup para el BME680
    Wire.begin(21,22);
    iaqSensor.begin(0x77, Wire);
@@ -113,117 +113,19 @@ void loop() {
   }
   mqtt_client.loop();
   
-  int actualTime = millis();
-  int actualTime2 = millis();
-  
-    if (actualTime - lastReadingTime > PUBLISH_PERIOD) {
-    lastReadingTime = actualTime;
-    Serial.println("Dato enviado");
-    Serial.println();
-    delay(50);
-    unsigned long time_trigger = millis();
-     
-    output = String(time_trigger);
-    
-    //************ Posteamos la temperatura ************
-    temp = iaqSensor.temperature;
-    Serial.println("Temperatura : " + String(temp));
-    String str(temp);
-    str.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("temp"), msg);  
-    
-    //************ Posteamos la humedad ************
-    hume = iaqSensor.humidity;
-    Serial.println("Humedad : " + String(hume));
-    String str2(hume);
-    str2.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("hume"), msg);  
-    
-    //************ Posteamos la Presion Atmosferica ************
-    pres = iaqSensor.pressure;
-    Serial.println("Presion Atmosferica : " + String(pres));
-    String str3(pres);
-    str3.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("pres"), msg);  
-    
-    //************ Posteamos el Index Air Quality ************
-    aqi = iaqSensor.iaq;
-    Serial.println("Index Air Quality : " + String(aqi));
-    String str4(aqi);
-    str4.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("aqi"), msg);  
-    
-    //************ Posteamos el Static Index Air Quality ************
-    sAQI = iaqSensor.staticIaq;
-    Serial.println("Static Index Air Quality : " + String(sAQI));
-    String str5(sAQI);
-    str5.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("sAQI"), msg);  
-    
-    //************ Posteamos el Index Air Quality Accurary ************
-    AQIa = iaqSensor.iaqAccuracy;
-    Serial.println("Index Air Quality Accuracy : " + String(AQIa));
-    String str6(AQIa);
-    str6.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("AQIa"), msg);
-    
-    //************ Posteamos el Gas Resistence ************
-    gas = (iaqSensor.gasResistance)/1000;
-    Serial.println("Gas Resistance kOhms: " + String(gas));
-    String str7(gas);
-    str7.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("gas"), msg);  
-    
-    //************ Posteamos el CO2 Equivalente ************
-    CO2e = iaqSensor.co2Equivalent;
-    Serial.println("CO2 Equivalente : " + String(CO2e));
-    String str8(CO2e);
-    str8.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("CO2e"), msg); 
-    
-    //************ Posteamos el VOC Equivalente ************
-    VOCe = iaqSensor.breathVocEquivalent;
-     Serial.println("VOC Equivalente : " + String(VOCe));
-    String str9(VOCe);
-    str9.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("VOCe"), msg);  
-    
-    //************ Posteamos la intensidad de señal ************
-    rssi = WiFi.RSSI();
-    Serial.println("Intensidad de Señal : " + String(rssi));
-    String str10(rssi);
-    str10.toCharArray(msg, 50);
-    mqtt_client.publish(getTopic("rssi"), msg); 
+  timeClient.update(); // Hace update en la hora 
+  //Serial.println(timeClient.getFormattedTime()); // Imprime en el monitor serial  la hora
 
-  
-  
-  }  //Fin de la funcion para publicar datos
-
-    // Serial.println();
-    delay(50);
-  
-    unsigned long time_trigger = millis();
-  if (iaqSensor.run()) { // If new data is available
-    output2 = String(time_trigger);
-    
-    output2 = String(time_trigger);
-    output2 += ", " + String(iaqSensor.rawTemperature);
-    output2 += ", " + String(iaqSensor.pressure);
-    output2 += ", " + String(iaqSensor.rawHumidity);
-    output2 += ", " + String(iaqSensor.gasResistance);
-    output2 += ", " + String(iaqSensor.iaq);
-    output2 += ", " + String(iaqSensor.iaqAccuracy);
-    output2 += ", " + String(iaqSensor.temperature);
-    output2 += ", " + String(iaqSensor.humidity);
-    output2 += ", " + String(iaqSensor.staticIaq);
-    output2 += ", " + String(iaqSensor.co2Equivalent);
-    output2 += ", " + String(iaqSensor.breathVocEquivalent);
-    Serial.println(output2);
-   
-    
-  } else {
-    checkIaqSensorStatus();
+  if(((timeClient.getMinutes() == 00) && (timeClient.getSeconds() == 00)) || ((timeClient.getMinutes() == 30) && (timeClient.getSeconds() == 00))) {
+    publicarDatos();
   }
+
+  
+  if(((timeClient.getMinutes() > 19) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 49) )) {
+  preHeatSensor();
+  }
+
+  delay(1000);
 }
 
 // Helper function definitions
@@ -338,4 +240,105 @@ void setupMQTT() {
 
   mqtt_client.setServer(mqtt_server, 1883);
   mqtt_client.setCallback(callback);
+}
+
+void publicarDatos(){
+
+    //output = String(time_trigger);
+    
+    //************ Posteamos la temperatura ************
+    temp = iaqSensor.temperature;
+    Serial.println("Temperatura : " + String(temp));
+    String str(temp);
+    str.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("temp"), msg);  
+    
+    //************ Posteamos la humedad ************
+    hume = iaqSensor.humidity;
+    Serial.println("Humedad : " + String(hume));
+    String str2(hume);
+    str2.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("hume"), msg);  
+    
+    //************ Posteamos la Presion Atmosferica ************
+    pres = iaqSensor.pressure;
+    Serial.println("Presion Atmosferica : " + String(pres));
+    String str3(pres);
+    str3.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("pres"), msg);  
+    
+    //************ Posteamos el Index Air Quality ************
+    aqi = iaqSensor.iaq;
+    Serial.println("Index Air Quality : " + String(aqi));
+    String str4(aqi);
+    str4.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("aqi"), msg);  
+    
+    //************ Posteamos el Static Index Air Quality ************
+    sAQI = iaqSensor.staticIaq;
+    Serial.println("Static Index Air Quality : " + String(sAQI));
+    String str5(sAQI);
+    str5.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("sAQI"), msg);  
+    
+    //************ Posteamos el Index Air Quality Accurary ************
+    AQIa = iaqSensor.iaqAccuracy;
+    Serial.println("Index Air Quality Accuracy : " + String(AQIa));
+    String str6(AQIa);
+    str6.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("AQIa"), msg);
+    
+    //************ Posteamos el Gas Resistence ************
+    gas = (iaqSensor.gasResistance)/1000;
+    Serial.println("Gas Resistance kOhms: " + String(gas));
+    String str7(gas);
+    str7.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("gas"), msg);  
+    
+    //************ Posteamos el CO2 Equivalente ************
+    CO2e = iaqSensor.co2Equivalent;
+    Serial.println("CO2 Equivalente : " + String(CO2e));
+    String str8(CO2e);
+    str8.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("CO2e"), msg); 
+    
+    //************ Posteamos el VOC Equivalente ************
+    VOCe = iaqSensor.breathVocEquivalent;
+     Serial.println("VOC Equivalente : " + String(VOCe));
+    String str9(VOCe);
+    str9.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("VOCe"), msg);  
+    
+    //************ Posteamos la intensidad de señal ************
+    rssi = WiFi.RSSI();
+    Serial.println("Intensidad de Señal : " + String(rssi));
+    String str10(rssi);
+    str10.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("rssi"), msg); 
+
+}
+
+void preHeatSensor(){
+  unsigned long time_trigger = millis();
+  if (iaqSensor.run()) { // If new data is available
+    output2 = String(time_trigger);
+    
+    output2 = String(time_trigger);
+    output2 += ", " + String(iaqSensor.rawTemperature);
+    output2 += ", " + String(iaqSensor.pressure);
+    output2 += ", " + String(iaqSensor.rawHumidity);
+    output2 += ", " + String(iaqSensor.gasResistance);
+    output2 += ", " + String(iaqSensor.iaq);
+    output2 += ", " + String(iaqSensor.iaqAccuracy);
+    output2 += ", " + String(iaqSensor.temperature);
+    output2 += ", " + String(iaqSensor.humidity);
+    output2 += ", " + String(iaqSensor.staticIaq);
+    output2 += ", " + String(iaqSensor.co2Equivalent);
+    output2 += ", " + String(iaqSensor.breathVocEquivalent);
+    Serial.println(output2);
+   
+    
+  } else {
+    checkIaqSensorStatus();
+  }
 }

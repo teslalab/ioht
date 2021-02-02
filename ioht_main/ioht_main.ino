@@ -21,10 +21,15 @@ Importante configuarar las siguientes variables, para el correcto funcionamiento
 también para logra una conexión a Nuestra Red WiF
 */
 //A continuación debe reemplazar el nombre y numero de estación que le fue asignado
+/*
+ioht/oscar/001-003
+ioht/isidro/001-003
+ioht/gabriel/001-003
+*/
 #define TEAM_NAME "ioht/isidro/003" //  proyecto/nombre/estacion 
 // Variables para la conexión a Red WiFi
-const char* ssid = "Tigo-9635"; // Debe reemplazar por el nombre de su RED WiFi
-const char* password = "2NJ555301438"; // Debe reemplazar por la contraseña de su RED WiFi
+const char* ssid = "Nombre_WiFi"; // Debe reemplazar por el nombre de su RED WiFi
+const char* password = "Contraseña_WiFi"; // Debe reemplazar por la contraseña de su RED WiFi
 
 /*
 A Partir de aca no tocar nada en el código

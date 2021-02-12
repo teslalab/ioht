@@ -26,7 +26,12 @@
   const char* password = "contraseña";   // Contraseña
 //Modificar al nombre que se asigne en el dashboard.
   #define TEAM_NAME "xxxx/yyyy/00x" //  proyecto/usuario/no.estacion 
-
+  /*
+  ioht/ugal/001
+  ioht/oscar/001
+  ioht/isidro/001
+  ioht/gabriel/001
+  */
 
 
 // Credenciales para GALioT

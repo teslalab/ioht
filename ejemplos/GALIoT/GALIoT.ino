@@ -13,6 +13,7 @@
   #include "bsec.h" 
   #include <NTPClient.h>
   #include <WiFiUdp.h>
+  
 // Variables para conexion NTP
   WiFiUDP ntpUDP;
   NTPClient timeClient(ntpUDP);
@@ -21,20 +22,19 @@
   Adafruit_FeatherOLED oled = Adafruit_FeatherOLED();  
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
- /* const char* ssid = "TIGO-9635"; // 
-  const char* password = "2NJ555301438";*/
+  const char* ssid = "SSID"; // Nombre del SSID
+  const char* password = "contraseña";   // Contraseña
+//Modificar al nombre que se asigne en el dashboard.
+  #define TEAM_NAME "xxxx/yyyy/00x" //  proyecto/usuario/no.estacion 
 
-  const char* ssid = "Cuarto_De_Juego"; 
-  const char* password = "A15004127";
-  
+
+
 // Credenciales para GALioT
   #define USERNAME "aquality"
   #define PASSWORD "$Air333"
   
 //Nombre del Servidor MQTT
   const char* mqtt_server = "galiot.galileo.edu";
-//Modificar al nombre que se asigne en el dashboard.
-  #define TEAM_NAME "ioht/isidro/003"
 
 //Declaración de funciones de ayuda
   void checkIaqSensorStatus(void);
@@ -105,6 +105,8 @@ void setup() {
   output = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent";
   Serial.println(output);
   delay(3000);
+  oled.init();
+  oled.clearDisplay();
 }
 
 void loop() {
@@ -121,9 +123,17 @@ void loop() {
   }
 
   
-  if(((timeClient.getMinutes() > 19) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 49) )) {
+  if(((timeClient.getMinutes() > 14) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 44) )) {
   preHeatSensor();
   }
+
+  if(timeClient.getSeconds() == 15){
+    String str69 = "Estacion en linea";
+    str69.toCharArray(msg, 50);
+    mqtt_client.publish(getTopic("Online"), msg); 
+  }
+
+  impresion();
 
   delay(1000);
 }
@@ -341,4 +351,19 @@ void preHeatSensor(){
   } else {
     checkIaqSensorStatus();
   }
+}
+
+void impresion(){
+  oled.setCursor(0,9);
+  oled.clearDisplay();
+  oled.setTextSize(1);
+
+  oled.print("Temperatura: ");
+  oled.println(iaqSensor.temperature);
+  
+  oled.print("Humedad: ");
+  oled.println(iaqSensor.humidity);
+
+  oled.print("sAQI: ");
+  oled.println(iaqSensor.staticIaq);
 }

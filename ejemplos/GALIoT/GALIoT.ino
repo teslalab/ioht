@@ -4,7 +4,7 @@
  *Descripción: En este programa usaremos la tarjeta de IoHT, conectaremos a la plataforma GALIoT
  *con ello podremos visualizar información de nuestras variables ambientales en los dashboard de IoHT 
  *cada 30 minutos se publicaran nuestro datos en el dashboard de GALIoT
- *Programa realizado por Angel Isidro - 26 enero 2021 - Versión 1 
+ *Programa realizado por Angel Isidro - 12 febrero 2021 - Versión 1.2 
  */
 // Libreria para usar las propiedades de conexión WiFi
   #include <WiFi.h>

@@ -89,9 +89,9 @@ void loop() {
     publicarDatos();
   }
 
- /* if(((timeClient.getMinutes() > 14) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 44) )) {
+  if(((timeClient.getMinutes() > 14) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 44) )) {
   preHeatSensor();
-  }*/
+  }
   
   if(timeClient.getSeconds() == 01){
     datosA1();

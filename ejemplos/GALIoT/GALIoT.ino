@@ -14,10 +14,10 @@
   NTPClient timeClient(ntpUDP);
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
-  const char* ssid = "SSID"; // Nombre del SSID
-  const char* password = "contraseña";   // Contraseña
+  const char* ssid = "Cuarto_De_Juego"; // Nombre del SSID
+  const char* password = "A15004127";   // Contraseña
 //Modificar al nombre que se asigne en el dashboard.
-  #define TEAM_NAME "xxxx/yyyy/00x" //  proyecto/usuario/no.estacion 
+  #define TEAM_NAME "ioht/isidro/001" //  proyecto/usuario/no.estacion 
   /*
   ioht/ugal/001
   ioht/oscar/001
@@ -89,9 +89,9 @@ void loop() {
     publicarDatos();
   }
 
-  if(((timeClient.getMinutes() > 14) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 44) )) {
+ /* if(((timeClient.getMinutes() > 14) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 44) )) {
   preHeatSensor();
-  }
+  }*/
   
   if(timeClient.getSeconds() == 01){
     datosA1();
@@ -111,7 +111,7 @@ void datosA1(){
   oled.clearDisplay();
   oled.setTextSize(1); 
   String hora = String(timeClient.getHours() - 6 );
-  String minutos = timeClient.getFormattedTime().substring(2,5);
+  String minutos = String(timeClient.getFormattedTime().substring(2,5));
 
   oled.println(hora + minutos);
   oled.setCursor(0,9);
@@ -133,7 +133,7 @@ void datosA2(){
   oled.clearDisplay();
   oled.setTextSize(1); 
   String hora = String(timeClient.getHours() - 6 );
-  String minutos = timeClient.getFormattedTime().substring(2,5);
+  String minutos = String(timeClient.getFormattedTime().substring(2,5));
 
   oled.println(hora + minutos);
   oled.setCursor(0,9);
@@ -156,7 +156,7 @@ void datosA3(){
   oled.clearDisplay();
   oled.setTextSize(1); 
   String hora = String(timeClient.getHours() - 6 );
-  String minutos = timeClient.getFormattedTime().substring(2,5);
+  String minutos = String(timeClient.getFormattedTime().substring(2,5));
   oled.println(hora + minutos);
   oled.setCursor(0,9);
 

@@ -40,7 +40,7 @@ void Task1code( void * pvParameters ){
     {
         for (int i = 0; i < PIXEL_COUNT; i++)
         {
-            neopixelLEDs.setPixelColor(i, neopixelLEDs.Color(0, 0, 50));
+            neopixelLEDs.setPixelColor(i, neopixelLEDs.Color(0, 0, 5));
         }
         neopixelLEDs.show();
         delay(500);

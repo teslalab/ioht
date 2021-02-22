@@ -14,10 +14,10 @@
   NTPClient timeClient(ntpUDP);
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
-  const char* ssid = "Nombre"; // Nombre del SSID
-  const char* password = "Contraseña";   // Contraseña
+  const char* ssid = "Cuarto_De_Juego"; // Nombre del SSID
+  const char* password = "A15004127";   // Contraseña
 //Modificar al nombre que se asigne en el dashboard.
-  #define TEAM_NAME "xxxx/yyyy/00x" //  proyecto/usuario/no.estacion 
+  #define TEAM_NAME "ioht/isidro/003" //  proyecto/usuario/no.estacion 
   /*
   ioht/ugal/001
   ioht/oscar/001

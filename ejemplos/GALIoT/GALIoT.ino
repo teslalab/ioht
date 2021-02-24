@@ -9,15 +9,17 @@
   #include <NTPClient.h>
   #include <WiFiUdp.h>
 
+  //libreria para booleanos
+  #include <stdbool.h>
   // Variables para conexion NTP
   WiFiUDP ntpUDP;
   NTPClient timeClient(ntpUDP);
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
-  const char* ssid = "Cuarto_De_Juego"; // Nombre del SSID
-  const char* password = "A15004127";   // Contraseña
+  const char* ssid = "Rigby."; // Nombre del SSID
+  const char* password = "PanConPollo";   // Contraseña
 //Modificar al nombre que se asigne en el dashboard.
-  #define TEAM_NAME "ioht/isidro/003" //  proyecto/usuario/no.estacion 
+  #define TEAM_NAME "ioht/gabriel/002" //  proyecto/usuario/no.estacion 
   /*
   ioht/ugal/001
   ioht/oscar/001
@@ -70,6 +72,8 @@ void setup() {
   oled.clearDisplay();
 }
 
+int publicar_flag = true;
+
 void loop() {
   oled.clearDisplay();
    
@@ -85,8 +89,11 @@ void loop() {
     mqtt_client.publish(getTopic("Online"), msg); 
   }
   
-   if(((timeClient.getMinutes() == 00) && (timeClient.getSeconds() == 00)) || ((timeClient.getMinutes() == 30) && (timeClient.getSeconds() == 00))) {
+  if((timeClient.getMinutes() % 30 == 00) && (timeClient.getSeconds() == 00) && publicar_flag) {
     publicarDatos();
+    publicar_flag = false;
+  }else if (timeClient.getMinutes() % 30 != 00){
+    publicar_flag = true;
   }
 
   if(((timeClient.getMinutes() > 14) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 44) )) {
@@ -102,7 +109,7 @@ void loop() {
   if(timeClient.getSeconds() == 41){
     datosA3();
   }
-  delay(1000); 
+  delay(200); 
 }
 
 void datosA1(){
@@ -329,7 +336,7 @@ void publish(char* topic, char* payload) {
 }
 
 char* getTopic(char* topic) {
-  sprintf(topic_name, "/%s/%s", TEAM_NAME, topic);
+  sprintf(topic_name, "%s/%s", TEAM_NAME, topic);
   return topic_name;
 }
 

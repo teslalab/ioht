@@ -14,10 +14,10 @@
   NTPClient timeClient(ntpUDP);
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
-  const char* ssid = "RODBARR-NG_2.4G"; // Nombre del SSID
-  const char* password = "%Internet9876";   // Contraseña
+  const char* ssid = "Rigby."; // Nombre del SSID
+  const char* password = "PanConPollo";   // Contraseña
 //Modificar al nombre que se asigne en el dashboard.
-  #define TEAM_NAME "ioht/oscar/001" //  proyecto/usuario/no.estacion 
+  #define TEAM_NAME "ioht/gabriel/002" //  proyecto/usuario/no.estacion 
   /*
   ioht/ugal/001
   ioht/oscar/001
@@ -28,7 +28,7 @@
   #define USERNAME "aquality"
   #define PASSWORD "$Air333"
 
-  const char* clientID= "ioht_oscar_1"; 
+  const char* clientID= "ioht_gabriel_2"; 
   const char* user = "aquality";
   const char* passwd = "$Air333";
   
@@ -491,16 +491,13 @@ void publicarDatos(){
       str10.toCharArray(msg, 50);
       if (mqtt_client.publish(getTopic("rssi"), msg)){
         Serial.println("RSSI enviado");
-        datosEnMQTTServer = true;
       } else {
         Serial.println("RSSI no enviado");
-        datosEnMQTTServer = false;
         Serial.println("Estado de la conexión MQTT Server: ");
         Serial.println(mqtt_client.state());
       } 
     } else {
       Serial.println("Cliente NO conectado a MQTT Server");
-      datosEnMQTTServer = false;
       Serial.print("Estado del error de conexión: ");
       Serial.println(mqtt_client.state());
     }

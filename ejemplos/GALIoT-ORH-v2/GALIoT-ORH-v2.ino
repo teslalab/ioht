@@ -53,8 +53,6 @@
   char msg_r[50];
   char topic_name[250];
 
-  boolean datosEnMQTTServer = false;  //Asegurarse que datos en MQTT Server
-
   // network variables
   WiFiClient espClient;
   PubSubClient mqtt_client(espClient);
@@ -81,6 +79,8 @@ void setup() {
   oled.clearDisplay();
 }
 
+boolean publicar_flag = true;
+
 void loop() {
   oled.clearDisplay();
 
@@ -99,21 +99,15 @@ void loop() {
     str69.toCharArray(msg, 50);
     mqtt_client.publish(getTopic("Online"), msg); 
   }
-  if(((timeClient.getMinutes() == 00) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10)) || ((timeClient.getMinutes() == 15) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10)) || ((timeClient.getMinutes() == 30) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10)) || ((timeClient.getMinutes() == 45) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10))) {
-    if (datosEnMQTTServer){
-      Serial.print("Datos publicados en MQTT Server: ");
-      Serial.println(datosEnMQTTServer);
-    } else {
-      Serial.println("Datos no publicados en MQTT Server");
-      publicarDatos();
-    }
+  
+  if((timeClient.getMinutes() % 15 == 00) && (timeClient.getSeconds() == 00) && publicar_flag) {
+    publicarDatos();
+    Serial.print("Datos publicados en MQTT Server: ");
+    publicar_flag = false;
+  }else if (timeClient.getMinutes() % 15 != 00){
+    publicar_flag = true;
   }
 
-    if(((timeClient.getMinutes() == 03) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10)) || ((timeClient.getMinutes() == 18) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10)) || ((timeClient.getMinutes() == 33) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10)) || ((timeClient.getMinutes() == 48) && (timeClient.getSeconds() > 00) && (timeClient.getSeconds() < 10))) {
-      datosEnMQTTServer = false;
-      Serial.print("Datos publicados en MQTT Server: ");
-      Serial.println(datosEnMQTTServer);
-    }
 
 /*
   if(((timeClient.getMinutes() > 20) && (timeClient.getMinutes() < 31)) || ((timeClient.getMinutes() > 44) )) {
@@ -133,7 +127,7 @@ void loop() {
     datosA4();
   }
   
-  delay(1000); 
+  delay(200); 
 }
 
 void datosA1(){

@@ -465,52 +465,52 @@ void publicarDatos()
     //************ Posteamos la temperatura ************
     temp = bme.temperature;
     Serial.println("Temperatura : " + String(temp));
-    (mqtt_client.publish(getTopic("temp"), msg)) ? enviados += "Temperatura enviada\n" : faltantes += "Temperatura\n";
+    (mqtt_client.publish(getTopic("temp"), temp)) ? enviados += "Temperatura enviada\n" : faltantes += "Temperatura\n";
 
     //************ Posteamos la humedad ************
     hume = bme.humidity;
     Serial.println("Humedad : " + String(hume));
-    (mqtt_client.publish(getTopic("hume"), msg)) ? enviados += "Humedad enviada\n" : faltantes += "Humedad\n";
+    (mqtt_client.publish(getTopic("hume"), hume)) ? enviados += "Humedad enviada\n" : faltantes += "Humedad\n";
 
     //************ Posteamos la Presion Atmosferica ************
     pres = bme.pressure;
     Serial.println("Presion Atmosferica : " + String(pres));
-    (mqtt_client.publish(getTopic("pres"), msg)) ? enviados += "Presion Atmosferica  enviada\n" : faltantes += "Presion Atmosferica \n";
+    (mqtt_client.publish(getTopic("pres"), pres)) ? enviados += "Presion Atmosferica  enviada\n" : faltantes += "Presion Atmosferica \n";
 
     //************ Posteamos el Index Air Quality ************
     aqi = bme.iaq;
     Serial.println("Air Quality Index: " + String(aqi));
-    (mqtt_client.publish(getTopic("aqi"), msg)) ? enviados += "Air Quality Index enviado\n" : faltantes += "Air Quality Index\n";
+    (mqtt_client.publish(getTopic("aqi"), aqi)) ? enviados += "Air Quality Index enviado\n" : faltantes += "Air Quality Index\n";
 
     //************ Posteamos el Static Index Air Quality ************
     sAQI = bme.staticIaq;
     Serial.println("Static Air Quality Index: " + String(sAQI));
-    (mqtt_client.publish(getTopic("sAQI"), msg)) ? enviados += "Static Air Quality Index enviado\n" : faltantes += "Index Air Quality\n";
+    (mqtt_client.publish(getTopic("sAQI"), sAQI)) ? enviados += "Static Air Quality Index enviado\n" : faltantes += "Index Air Quality\n";
 
     //************ Posteamos el Index Air Quality Accurary ************
     AQIa = bme.iaqAccuracy;
     Serial.println("Index Air Quality Accuracy : " + String(AQIa));
-    (mqtt_client.publish(getTopic("AQIa"), msg)) ? enviados += "Index Air Quality Accuracy enviado\n" : faltantes += "Index Air Quality Accuracy\n";
+    (mqtt_client.publish(getTopic("AQIa"), AQIa)) ? enviados += "Index Air Quality Accuracy enviado\n" : faltantes += "Index Air Quality Accuracy\n";
 
     //************ Posteamos el Gas Resistence ************
     gas = (bme.gasResistance) / 1000;
     Serial.println("Gas Resistance kOhms: " + String(gas));
-    (mqtt_client.publish(getTopic("gas"), msg)) ? enviados += "Gas Resistance kOhms enviado\n" : faltantes += "Gas Resistance kOhms\n";
+    (mqtt_client.publish(getTopic("gas"), gas)) ? enviados += "Gas Resistance kOhms enviado\n" : faltantes += "Gas Resistance kOhms\n";
 
     //************ Posteamos el CO2 Equivalente ************
     CO2e = bme.co2Equivalent;
     Serial.println("CO2 Equivalente : " + String(CO2e));
-    (mqtt_client.publish(getTopic("CO2e"), msg)) ? enviados += "CO2 Equivalente enviado\n" : faltantes += "CO2 Equivalente\n";
+    (mqtt_client.publish(getTopic("CO2e"), CO2e)) ? enviados += "CO2 Equivalente enviado\n" : faltantes += "CO2 Equivalente\n";
 
     //************ Posteamos el VOC Equivalente ************
     VOCe = bme.breathVocEquivalent;
     Serial.println("VOC Equivalente : " + String(VOCe));
-    (mqtt_client.publish(getTopic("VOCe"), msg)) ? enviados += "VOC Equivalente enviado\n" : faltantes += "VOC Equivalente \n";
+    (mqtt_client.publish(getTopic("VOCe"), VOCe)) ? enviados += "VOC Equivalente enviado\n" : faltantes += "VOC Equivalente \n";
 
     //************ Posteamos la intensidad de señal ************
     rssi = WiFi.RSSI();
     Serial.println("Intensidad de Señal : " + String(rssi));
-    (mqtt_client.publish(getTopic("rssi"), msg)) ? enviados += "Intensidad de Señal enviado\n" : faltantes += "Intensidad de Señal\n";
+    (mqtt_client.publish(getTopic("rssi"), rssi)) ? enviados += "Intensidad de Señal enviado\n" : faltantes += "Intensidad de Señal\n";
     
     
     Serial.println(enviados);

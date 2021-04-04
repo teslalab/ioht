@@ -14,7 +14,7 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 
 //Credenciales para poder conectarnos a la red-WiFi sustituya dentro de las comillas
-const char *ssid = "Rigby.";          // Nombre del SSID
+const char *ssid = "Rigby";           // Nombre del SSID
 const char *password = "PanConPollo"; // Contraseña
                                       //Modificar al nombre que se asigne en el dashboard.
 #define TEAM_NAME "ioht/gabriel/001"  //  proyecto/usuario/no.estacion
@@ -342,9 +342,12 @@ void setupWiFi()
   Serial.println(ssid);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  delay(2000);
   while (WiFi.status() != WL_CONNECTED)
   {
-    delay(500);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    delay(2000);
     Serial.print(".");
   }
   Serial.println("");
@@ -521,8 +524,7 @@ void publicarDatos()
     Serial.println("Intensidad de Señal : " + String(rssi));
     String(rssi).toCharArray(msg, 50);
     (mqtt_client.publish(getTopic("rssi"), msg)) ? enviados += "Intensidad de Señal enviado\n" : faltantes += "Intensidad de Señal\n";
-    
-    
+
     Serial.println(enviados);
 
     if (faltantes != "Datos no enviados\n: \n")
@@ -530,8 +532,14 @@ void publicarDatos()
       Serial.println(faltantes);
       Serial.println("Estado de la conexión MQTT Server: ");
       Serial.println(mqtt_client.state());
+      String(faltantes).toCharArray(msg, 2000);
+      (mqtt_client.publish(getTopic("info"), msg)) ? Serial.println("Fallo en envio de log") : Serial.println("Log enviado.");
     }
-    
+    else
+    {
+      String("Todos enviados.").toCharArray(msg, 100);
+      (mqtt_client.publish(getTopic("info"), msg)) ? Serial.println("Fallo en envio de log") : Serial.println("Log enviado.");
+    }
   }
   else
   {

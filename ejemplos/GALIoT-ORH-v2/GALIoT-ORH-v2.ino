@@ -9,6 +9,8 @@ Adafruit_FeatherOLED oled = Adafruit_FeatherOLED();
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 
+#include <Adafruit_NeoPixel.h>
+
 // Variables para conexion NTP
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
@@ -57,6 +59,16 @@ char topic_name[250];
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
 
+#define PIXEL_PIN 14  // Digital IO pin connected to the NeoPixels.
+#define PIXEL_COUNT 6 // Number of NeoPixels
+
+Adafruit_NeoPixel neopixelLEDs(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
+
+//Variables
+int red = 0;
+int blue = 0;
+int green = 0;
+
 void setup()
 {
   Serial.begin(115200);
@@ -94,6 +106,7 @@ void loop()
     delay(2000);
   }
   */
+  mqtt_client.subscribe("/ioht/colorpicker");
   mqtt_client.loop();
   timeClient.update(); // Hace update en la hora
 
@@ -101,7 +114,7 @@ void loop()
   {
     if (mqtt_client.connect(clientID, user, passwd))
     {
-      Serial.println("Client connected to mqtt");
+      //Serial.println("Client connected to mqtt");
     }
     String str69 = "Estacion en línea";
     str69.toCharArray(msg, 50);
@@ -395,6 +408,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   Serial.print("'");
   Serial.print(msg_r);
   Serial.println("'");
+  colorConverter(msg_r);
 }
 void reconnect()
 {
@@ -450,7 +464,7 @@ void preHeatSensor()
     output2 += ", " + String(bme.staticIaq);
     output2 += ", " + String(bme.co2Equivalent);
     output2 += ", " + String(bme.breathVocEquivalent);
-    Serial.println(output2);
+    //Serial.println(output2);
   }
   else
   {
@@ -460,6 +474,9 @@ void preHeatSensor()
 
 void publicarDatos()
 {
+  mqtt_client.setServer(mqtt_server, 1883);
+  mqtt_client.setCallback(callback);
+  delay(100);
   String faltantes = "Datos no enviados\n: \n";
   String enviados = "";
   if (mqtt_client.connect(clientID, user, passwd))
@@ -547,4 +564,26 @@ void publicarDatos()
     Serial.print("Estado del error de conexión: ");
     Serial.println(mqtt_client.state());
   }
+}
+void colorConverter(String hexValue)
+{
+    int number = (int)strtol(&hexValue[0], NULL, 16);
+    int r = number >> 16 & 0xFF;
+    int g = number >> 8 & 0xFF;
+    int b = number & 0xFF;
+
+    Serial.print("red is ");
+    Serial.println(r);
+    Serial.print("green is ");
+    Serial.println(g);
+    Serial.print("blue is ");
+    Serial.println(b);
+
+    neopixelLEDs.clear(); // Colocamos todos los pixels en 'off'
+
+    for (int i = 0; i < PIXEL_COUNT; i++)
+    {
+        neopixelLEDs.setPixelColor(i, neopixelLEDs.Color(r, g, b));
+    }
+    neopixelLEDs.show(); // Mandamos el update del color al hardware.
 }
